@@ -44,11 +44,11 @@ terra dpotrf_terra(rect: rect2d, m:int,
                    fld : c.legion_field_id_t)
   var rawA = get_raw_ptr_2d(rect, pr, fld)
   var uplo : rawstring = 'L'
-  c.printf("M: %d Offset: %d\n", m, rawA.offset)
   var start = c.legion_get_current_time_in_micros()
-  lapack.LAPACKE_dpotrf(cblas.CblasColMajor, @uplo, m, rawA.ptr, rawA.offset)
+  var info = lapack.LAPACKE_dpotrf(cblas.CblasColMajor, @uplo, m, rawA.ptr, rawA.offset)
   var stop = c.legion_get_current_time_in_micros()
-  c.printf("Lapack: %lu\n", stop - start)
+  c.printf("Info: %d\n", info)
+  c.printf("Time: %lu\n", stop - start)
 end
 
 __demand(__leaf)
@@ -122,7 +122,19 @@ do
 end
 
 task main()
-  var matrix_file_path = "matrix.mtx"
+  var args = c.legion_runtime_get_input_args()
+
+  var matrix_file_path = ""
+  var factored_file_path = ""
+
+  for i = 0, args.argc do
+    if c.strcmp(args.argv[i], "-i") == 0 then
+      matrix_file_path = args.argv[i+1]
+    elseif c.strcmp(args.argv[i], "-o") == 0 then
+      factored_file_path = args.argv[i+1]
+    end
+  end
+
   var matrix_file = c.fopen(matrix_file_path, 'r')
   var banner = read_matrix_banner(matrix_file)
 
@@ -139,7 +151,7 @@ task main()
   end
 
   dpotrf(mat)
-  write_matrix(mat, "factored_matrix_rg.mtx", banner)
+  write_matrix(mat, factored_file_path, banner)
 end
 
 regentlib.start(main)

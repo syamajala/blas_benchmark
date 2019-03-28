@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <cblas.h>
 #include <lapacke.h>
 #include <time.h>
@@ -7,11 +8,21 @@
 
 int main(int argc, char *argv[])
 {
-  FILE *f = fopen(argv[1], "r");
+  char *matrix_file_path = NULL;
+  char *factored_file_path = NULL;
+
+  for(int i = 0; i < argc; i++)
+  {
+    if(strcmp(argv[i], "-i") == 0)
+      matrix_file_path = argv[i+1];
+    else if (strcmp(argv[i], "-o") == 0)
+      factored_file_path = argv[i+1];
+  }
+
+  FILE *f = fopen(matrix_file_path, "r");
   int M = 0;
   int N = 0;
   int NZ = 0;
-  int idx = 0;
 
   size_t dim = 1024;
   char *line = NULL;
@@ -45,7 +56,7 @@ int main(int argc, char *argv[])
   printf("Info: %d\n", info);
   printf("Time (microseconds): %lu\n", delta_us);
 
-  FILE *fp = fopen(argv[2], "w");
+  FILE *fp = fopen(factored_file_path, "w");
   for(int i = 0; i < M; i++)
   {
     for(int j = 0; j < N; j++)

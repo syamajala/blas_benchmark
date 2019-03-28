@@ -10,7 +10,7 @@ install(TARGETS read
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-set(Legion_DIR /home/seshu/dev/legion/language/build)
+set(Legion_DIR $ENV{LG_RT_DIR}/../language/build/)
 
 # Only search if were building stand-alone and not as part of Legion
 if(NOT Legion_SOURCE_DIR)
